@@ -6,7 +6,6 @@ import (
 	"os"
 	"path"
 	"strings"
-	"time"
 
 	"github.com/ghetzel/cli"
 	"github.com/ghetzel/goflite"
@@ -36,7 +35,7 @@ func main() {
 		cli.DurationFlag{
 			Name:  `post-finish-delay`,
 			Usage: `Specifies how long to wait after the buffers drain before exiting.`,
-			Value: 250 * time.Millisecond,
+			Value: goflite.DefaultPostFinishDelay,
 		},
 		cli.IntFlag{
 			Name:  `target-mean, M`,

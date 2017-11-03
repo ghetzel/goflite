@@ -30,6 +30,7 @@ import (
 
 var DefaultClientName = `goflite`
 var DefaultStreamName = `Flite Voice Synthesizer`
+var DefaultPostFinishDelay = 150 * time.Millisecond
 
 type Synthesizer struct {
 	StreamName      string
@@ -46,9 +47,10 @@ func NewSynthesizer() (*Synthesizer, error) {
 
 	if voice, ok := voices.flitevox[DefaultVoiceName]; ok {
 		return &Synthesizer{
-			StreamName: DefaultStreamName,
-			voice:      voice,
-			voicename:  DefaultVoiceName,
+			StreamName:      DefaultStreamName,
+			PostFinishDelay: DefaultPostFinishDelay,
+			voice:           voice,
+			voicename:       DefaultVoiceName,
 		}, nil
 	} else {
 		return nil, fmt.Errorf("Unknown default voice %q", DefaultVoiceName)
