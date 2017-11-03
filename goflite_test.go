@@ -10,15 +10,15 @@ import "testing"
 
 func TestSynthesisWithInvalidVoice(t *testing.T) {
 	voicename := "invalid"
-	_, err := TextToWave("Testing", voicename)
+	_, err := getVoice(voicename)
 	if err == nil {
 		t.Errorf("Synthesis should fail when voicename is invalid")
 	}
 }
 
 func TestSynthesisWithDefaultVoice(t *testing.T) {
-	voicename := defaultVoiceName
-	w, err := TextToWave("Hello World", voicename)
+	voicename := DefaultVoiceName
+	w, err := TextToWave("Hello World", mustGetVoice(voicename))
 	if err != nil {
 		t.Errorf("Synthesis with default voice should not fail")
 	}

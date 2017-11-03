@@ -23,14 +23,22 @@ import "C"
 import (
 	"errors"
 	"unsafe"
+
+	"github.com/op/go-logging"
 )
 
+var log = logging.MustGetLogger(`goflite`)
+
 var voices *voxbase // List of available voices stored here
+var isInitialized bool
 
 // Initialize Flite
-func init() {
-	C.flitewrap_init()
-	voices = newVoxBase()
+func initFlite() {
+	if !isInitialized {
+		C.flitewrap_init()
+		voices = newVoxBase()
+		isInitialized = true
+	}
 }
 
 // If you have built flite voices and have the flitevox files
@@ -38,34 +46,24 @@ func init() {
 // to the voice being added and a path to the location of the flitevox
 // file.  Prefer absolute pathname.
 func AddVoice(name, path string) error {
+	initFlite()
+
 	return voices.addVoice(name, path)
 }
 
 // Run Text to Speech on a given text with a selected voice and return
 // Wave data. If voicename is empty, a default voice will be used for
 // the speech synthesis.
-func TextToWave(text, voicename string) (*Wave, error) {
+func TextToWave(text string, v flitevoice) (*Wave, error) {
+	initFlite()
+
 	var (
 		w      *Wave       // Waveform to Return
-		v      flitevoice  // Voice to use
 		cstwav *C.cst_wave // Flite's wave structure
 	)
 
-	if voicename == "" {
-		// Choose default voice
-		voicename = defaultVoiceName
-	}
-
 	ctext := C.CString(text)
 	defer C.free(unsafe.Pointer(ctext))
-
-	voices.mutex.RLock()
-	v, ok := voices.flitevox[voicename]
-	voices.mutex.RUnlock()
-
-	if !ok {
-		return nil, errors.New("Requested voice not available")
-	}
 
 	cstwav = C.flite_text_to_wave(ctext, v)
 	if cstwav == nil {

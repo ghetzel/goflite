@@ -8,14 +8,12 @@ package goflite
 
 import "testing"
 
-import ()
-
 func TestSLTVoiceAvailable(t *testing.T) {
 	vb := newVoxBase()
 	defer vb.free()
-	_, present := vb.flitevox[defaultVoiceName]
+	_, present := vb.flitevox[DefaultVoiceName]
 	if !present {
-		t.Errorf("The default voice (%s) is not available", defaultVoiceName)
+		t.Errorf("The default voice (%s) is not available", DefaultVoiceName)
 	}
 
 }

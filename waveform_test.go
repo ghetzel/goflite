@@ -6,11 +6,11 @@
 
 package goflite
 
-import "testing"
-
 import (
 	"bytes"
 	"errors"
+	"testing"
+	"time"
 )
 
 type spanic struct{}
@@ -65,7 +65,7 @@ func TestNonEmptyWaveform(t *testing.T) {
 		t.Errorf("Expected length of waveform 64 bytes. Received %d bytes", b.Len())
 	}
 
-	if w.Duration() != 10.0 {
+	if w.Duration() != time.Duration(10*time.Second) {
 		t.Errorf("Expected duration: 10. Received Duration %1.3f", w.Duration())
 	}
 

@@ -1,1 +1,3 @@
-dep/
+/dep
+/bin
+*.wav

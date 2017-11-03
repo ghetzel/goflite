@@ -13,6 +13,7 @@ import "C"
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"unsafe"
 )
@@ -20,7 +21,7 @@ import (
 // Type for pointers to Flite Voice Structures
 type flitevoice *C.cst_voice
 
-const defaultVoiceName = "slt"
+const DefaultVoiceName = "slt"
 
 // Voice db
 type voxbase struct {
@@ -28,18 +29,39 @@ type voxbase struct {
 	mutex    sync.RWMutex
 }
 
+func getVoice(name string) (flitevoice, error) {
+	initFlite()
+
+	voices.mutex.RLock()
+	defer voices.mutex.RUnlock()
+
+	if voice, ok := voices.flitevox[name]; ok {
+		return voice, nil
+	} else {
+		return nil, fmt.Errorf("No such voice %q", name)
+	}
+}
+
+func mustGetVoice(name string) flitevoice {
+	if voice, err := getVoice(name); err == nil {
+		return voice
+	} else {
+		panic(err.Error())
+	}
+}
+
 func newVoxBase() *voxbase {
 	s := &voxbase{flitevox: make(map[string]flitevoice)}
 
 	// Add Default Voice
-	name := C.CString(defaultVoiceName)
+	name := C.CString(DefaultVoiceName)
 	v := C.flite_voice_select(name)
 	C.free(unsafe.Pointer(name))
 
 	if v != nil {
 		name := C.GoString(v.name)
-		if name == defaultVoiceName {
-			s.flitevox[defaultVoiceName] = v
+		if name == DefaultVoiceName {
+			s.flitevox[DefaultVoiceName] = v
 		} else {
 			C.delete_voice(v)
 		}
@@ -78,7 +100,7 @@ func (voices *voxbase) free() {
 	defer voices.mutex.Unlock()
 
 	for name, voice := range voices.flitevox {
-		if name != defaultVoiceName {
+		if name != DefaultVoiceName {
 			// Default voice is linked in, don't remove it
 			C.delete_voice(voice)
 		}
