@@ -17,8 +17,14 @@ func TestSynthesisWithInvalidVoice(t *testing.T) {
 }
 
 func TestSynthesisWithDefaultVoice(t *testing.T) {
-	voicename := DefaultVoiceName
-	w, err := TextToWave("Hello World", mustGetVoice(voicename))
+	synth, err := NewSynthesizer()
+
+	if err != nil {
+		t.Errorf("failed to initialize synthesizer")
+		return
+	}
+
+	w, err := synth.Synthesize("Hello World")
 	if err != nil {
 		t.Errorf("Synthesis with default voice should not fail")
 	}

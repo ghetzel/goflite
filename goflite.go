@@ -55,12 +55,10 @@ func AddVoice(name, path string) error {
 // Wave data. If voicename is empty, a default voice will be used for
 // the speech synthesis.
 func TextToWave(text string, v flitevoice) (*Wave, error) {
-	initFlite()
+	var w *Wave            // Waveform to Return
+	var cstwav *C.cst_wave // Flite's wave structure
 
-	var (
-		w      *Wave       // Waveform to Return
-		cstwav *C.cst_wave // Flite's wave structure
-	)
+	initFlite()
 
 	ctext := C.CString(text)
 	defer C.free(unsafe.Pointer(ctext))
@@ -69,6 +67,8 @@ func TextToWave(text string, v flitevoice) (*Wave, error) {
 	if cstwav == nil {
 		return nil, errors.New("Speech synthesis failed")
 	}
+
+	log.Debugf("voice: %+v", v.features.head.val)
 
 	num_samples := uint32(cstwav.num_samples)
 

@@ -88,7 +88,33 @@ func (self *Synthesizer) Say(input string) error {
 }
 
 func (self *Synthesizer) Synthesize(input string) (*Wave, error) {
-	return TextToWave(input, self.voice)
+	var w *Wave            // Waveform to Return
+	var cstwav *C.cst_wave // Flite's wave structure
+
+	initFlite()
+
+	ctext := C.CString(input)
+	defer C.free(unsafe.Pointer(ctext))
+
+	cstwav = C.flite_text_to_wave(ctext, self.voice)
+
+	if cstwav == nil {
+		return nil, fmt.Errorf("Speech synthesis failed")
+	}
+
+	num_samples := uint32(cstwav.num_samples)
+
+	w = &Wave{
+		SampleRate:  uint16(cstwav.sample_rate),
+		NumSamples:  num_samples,
+		NumChannels: uint16(cstwav.num_channels),
+		Samples:     make([]uint16, num_samples),
+	}
+
+	C.copy_wav_into_slice(cstwav, (*C.short)(unsafe.Pointer(&(w.Samples[0]))))
+	C.delete_wave(cstwav)
+
+	return w, nil
 }
 
 func (self *Synthesizer) SetVoice(name string) error {
@@ -106,23 +132,13 @@ func (self *Synthesizer) SetVoice(name string) error {
 }
 
 func (self *Synthesizer) SetFloatFeature(name string, value float64) {
-	cName := C.CString(name)
-	defer C.free(unsafe.Pointer(cName))
-	C.flite_feat_set_float(self.voice.features, cName, C.float(value))
+	C.flite_feat_set_float(self.voice.features, C.CString(name), C.float(value))
 }
 
 func (self *Synthesizer) SetIntFeature(name string, value int64) {
-	cName := C.CString(name)
-	defer C.free(unsafe.Pointer(cName))
-	C.flite_feat_set_int(self.voice.features, cName, C.int(value))
+	C.flite_feat_set_int(self.voice.features, C.CString(name), C.int(value))
 }
 
 func (self *Synthesizer) SetFeature(name string, value string) {
-	cName := C.CString(name)
-	cValue := C.CString(value)
-
-	defer C.free(unsafe.Pointer(cName))
-	defer C.free(unsafe.Pointer(cValue))
-
-	C.flite_feat_set_string(self.voice.features, cName, cValue)
+	C.flite_feat_set_string(self.voice.features, C.CString(name), C.CString(value))
 }

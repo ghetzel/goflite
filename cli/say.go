@@ -33,7 +33,7 @@ func main() {
 			Usage: `Specifies the voice to synthesize.`,
 		},
 		cli.DurationFlag{
-			Name:  `post-finish-delay`,
+			Name:  `post-finish-delay, d`,
 			Usage: `Specifies how long to wait after the buffers drain before exiting.`,
 			Value: goflite.DefaultPostFinishDelay,
 		},
@@ -113,13 +113,27 @@ func main() {
 		}
 
 		if synth, err := goflite.NewSynthesizer(); err == nil {
+			if err := synth.SetVoice(c.String(`voice`)); err != nil {
+				log.Fatalf("failed to set voice: %v", err)
+				return
+			}
+
 			synth.PostFinishDelay = c.Duration(`post-finish-delay`)
+			synth.SetIntFeature(`int_f0_target_mean`, int64(c.Int(`target-mean`)))
+			synth.SetIntFeature(`int_f0_target_stddev`, int64(c.Int(`target-stddev`)))
+			synth.SetFloatFeature(`duration_stretch`, c.Float64(`stretch`))
 
-			synth.SetFloatFeature(`int_f0_target_mean`, float64(c.Int(`target-mean`)))
-			synth.SetFloatFeature(`int_f0_target_stddev`, float64(c.Int(`target-stddev`)))
-			synth.SetFloatFeature(`duration_stretch`, c.Float64(`target-mean`))
+			input := c.Args().First()
 
-			if err := synth.Say(c.Args().First()); err != nil {
+			if input == `` {
+				if data, err := ioutil.ReadAll(os.Stdin); err == nil {
+					if len(data) > 0 {
+						input = string(data)
+					}
+				}
+			}
+
+			if err := synth.Say(input); err != nil {
 				log.Fatal(err)
 			}
 		} else {

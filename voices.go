@@ -51,7 +51,9 @@ func mustGetVoice(name string) flitevoice {
 }
 
 func newVoxBase() *voxbase {
-	s := &voxbase{flitevox: make(map[string]flitevoice)}
+	s := &voxbase{
+		flitevox: make(map[string]flitevoice),
+	}
 
 	// Add Default Voice
 	name := C.CString(DefaultVoiceName)
@@ -59,8 +61,7 @@ func newVoxBase() *voxbase {
 	C.free(unsafe.Pointer(name))
 
 	if v != nil {
-		name := C.GoString(v.name)
-		if name == DefaultVoiceName {
+		if name := C.GoString(v.name); name == DefaultVoiceName {
 			s.flitevox[DefaultVoiceName] = v
 		} else {
 			C.delete_voice(v)
@@ -77,8 +78,8 @@ func newVoxBase() *voxbase {
 func (voices *voxbase) addVoice(name, path string) error {
 	voices.mutex.Lock()
 	defer voices.mutex.Unlock()
-	_, present := voices.flitevox[name]
-	if present {
+
+	if _, ok := voices.flitevox[name]; ok {
 		return errors.New("Voice with given name already present")
 	}
 
@@ -86,6 +87,7 @@ func (voices *voxbase) addVoice(name, path string) error {
 	defer C.free(unsafe.Pointer(pathC))
 
 	v := C.flite_voice_select(pathC)
+
 	if v == nil {
 		return errors.New("Voice File could not be loaded")
 	}
