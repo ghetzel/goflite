@@ -31,6 +31,7 @@ func main() {
 		cli.StringFlag{
 			Name:  `voice, V`,
 			Usage: `Specifies the voice to synthesize.`,
+			Value: goflite.DefaultVoiceName,
 		},
 		cli.DurationFlag{
 			Name:  `post-finish-delay, d`,
