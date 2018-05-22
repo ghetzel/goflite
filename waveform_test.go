@@ -66,7 +66,7 @@ func TestNonEmptyWaveform(t *testing.T) {
 	}
 
 	if w.Duration() != time.Duration(10*time.Second) {
-		t.Errorf("Expected duration: 10. Received Duration %1.3f", w.Duration())
+		t.Errorf("Expected duration: 10. Received Duration %v", w.Duration())
 	}
 
 }

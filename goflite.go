@@ -5,9 +5,9 @@
 // Author: Alok Parlikar <aup@cs.cmu.edu>
 
 // Use the CMU Flite Text-To-Speech Engine from Go
-package goflite
-
 // +build linux,cgo
+
+package goflite
 
 /*
  #cgo CFLAGS: -I ${SRCDIR} -I${SRCDIR}/dep/flite/include

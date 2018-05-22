@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 // Author: Gary Hetzel <garyhetzel@gmail.com>
-package goflite
-
 // +build linux,cgo
+
+package goflite
 
 /*
  #cgo CFLAGS: -I ${SRCDIR} -I${SRCDIR}/dep/flite/include
